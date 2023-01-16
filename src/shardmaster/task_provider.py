@@ -4,6 +4,8 @@ from trio import MemoryReceiveChannel, MemorySendChannel
 import trio
 from .protocols import TaskT
 
+from deprecated import deprecated
+
 class BaseTaskProvider(ABC, Generic[TaskT]):
 	"""
 	The provider's contract is to take responsibility for closing the task distribution channel(s) once it is done providing them.
@@ -24,10 +26,6 @@ class BasePooledTaskProvider(BaseTaskProvider):
 		self._channel = channel
 
 	def done(self):
-		"""
-		.done() is provided for convenience.
-		Calling self.done() is not mandatory - there are other ways to close the channel, such as using context managers.
-		"""
 		self._channel.close()
 
 class BaseDedicatedTaskProvider(BaseTaskProvider):
@@ -40,9 +38,5 @@ class BaseDedicatedTaskProvider(BaseTaskProvider):
 		self._channels = channels
 
 	def done(self):
-		"""
-		.done() is provided for convenience.
-		Calling self.done() is not mandatory - there are other ways to close the channel, such as using context managers.
-		"""
 		for channel in self._channels:
 			channel.close() # closing a channel is idempotent; doesn't matter if it already was closed
